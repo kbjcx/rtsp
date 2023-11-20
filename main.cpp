@@ -160,8 +160,99 @@ static int parseAdtsHeader(uint8_t* in, AdtsHeader* res) {
         res->adtsBufferFullness = (((unsigned int)in[5] & 0x1F) << 6) | (((unsigned int)in[6] & 0xFC) >> 2);
         res->numberOfRawDataBlockInFrame = ((unsigned int)in[6] & 0x03);
 
+        return 0;
     } else {
         printf("failed to parse adts header\n");
         return -1;
     }
 }
+
+static int rtpSendAACFrame(int clientSockfd, RtpPacket* rtpPacket, uint8_t* frame, uint32_t frameSize) {
+    int ret = 0;
+
+    rtpPacket->payload[0] = 0x00;
+    rtpPacket->payload[1] = 0x10;
+    rtpPacket->payload[2] = (frameSize & 0x1FE0) >> 5;
+    rtpPacket->payload[3] = (frameSize & 0x1F) << 3;
+
+    memcpy(rtpPacket->payload + 4, frame, frameSize);
+
+    ret = rtpSendPacketOverTcp(clientSockfd, rtpPacket, frameSize + 4, 0x02);
+
+    if (ret < 0) {
+        printf("failed to send rtp packet \n");
+        return -1;
+    }
+
+    rtpPacket->rtpHeader.seq++;
+
+    rtpPacket->rtpHeader.timestamp += 1025;
+
+    return 0;
+}
+
+static int rtpSendH264Frame(int clientSockfd, RtpPacket* rtpPacket, char* frame, uint32_t frameSize) {
+    uint8_t naluType = 0;
+    int sendByte = 0;
+    int ret = -1;
+
+    naluType = frame[0];
+
+    printf("%s frameSize = %d \n", __FUNCTION__, frameSize);
+    if (frameSize <= RTP_MAX_PACKET_SIZE) {
+        // 整包发送
+        memcpy(rtpPacket->payload, frame, frameSize);
+        ret = rtpSendPacketOverTcp(clientSockfd, rtpPacket, frameSize, 0x00);
+        if (ret < 0) {
+            return -1;
+        }
+
+        rtpPacket->rtpHeader.seq++;
+
+        if ((naluType & 0x1F) == 7 || (naluType & 0x1F) == 8) {
+            // TODO
+        }
+    } else {
+        int pktNum = frameSize / RTP_MAX_PACKET_SIZE;
+        int remainPktSize = frameSize % RTP_MAX_PACKET_SIZE;
+        int pos = 1;
+
+        for (int i = 0; i < pktNum; ++i) {
+            rtpPacket->payload[0] = (naluType & 0x60) | 28;
+            rtpPacket->payload[1] = naluType & 0x1F;
+
+            if (i == 0) {
+                rtpPacket->payload[1] |= 0x80;
+            } else if (remainPktSize == 0 && i == pktNum - 1) {
+                rtpPacket->payload[1] |= 0x40;
+            }
+
+            memcpy(rtpPacket->payload + 2, frame + pos, RTP_MAX_PACKET_SIZE);
+            ret = rtpSendPacketOverTcp(clientSockfd, rtpPacket, RTP_MAX_PACKET_SIZE + 2, 0x00);
+            if (ret < 0) {
+                return -1;
+            }
+
+            rtpPacket->rtpHeader.seq++;
+            sendByte += ret;
+            pos += RTP_MAX_PACKET_SIZE;
+        }
+
+        if (remainPktSize > 0) {
+            rtpPacket->payload[0] = naluType & 0x60 | 28;
+            rtpPacket->payload[1] = (naluType & 0x1F) | 0x40;
+
+            memcpy(rtpPacket->payload + 2, frame + pos, remainPktSize);
+            ret = rtpSendPacketOverTcp(clientSockfd, rtpPacket, remainPktSize + 2, 0x00);
+            if (ret < 0) {
+                return -1;
+            }
+
+            rtpPacket->rtpHeader.seq++;
+            sendByte += ret;
+        }
+    }
+
+    return sendByte;
+}
+
