@@ -2,11 +2,14 @@
 #include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <cstdlib>
 #include <cstdio>
 #include <time.h>
+#include <thread>
+#include <unistd.h>
 
 #define AAC_FILE_NAME   "./test.aac"
 #define H264_FILE_NAME  "./test.h264"
@@ -328,7 +331,7 @@ static int handleCmdPlay(char* res, int cseq) {
     return 0;
 }
 
-static int doClient(int clientSockfd, const char* clientIp, int clientPort) {
+static void doClient(int clientSockfd, const char* clientIp, int clientPort) {
     char method[40];
     char url[100];
     char version[40];
@@ -395,7 +398,140 @@ static int doClient(int clientSockfd, const char* clientIp, int clientPort) {
         send(clientSockfd, sBuf, strlen(sBuf), 0);
 
         if (!strcmp(method, "PLAY")) {
-            
+            std::thread t1([&]() {
+                int frameSize, startCode;
+                char* frame = (char*)malloc(500000);
+                RtpPacket* rtpPacket = (RtpPacket*)malloc(500000);
+
+                FILE* fp = fopen(H264_FILE_NAME, "rb");
+                if (fp == nullptr) {
+                    printf("can not open file: %s\n", H264_FILE_NAME);
+                    return ;
+                }
+
+                rtpHeaderInit(rtpPacket, 0, 0, 0, RTP_VERSION, RTP_PAYLOAD_TYPE_H264, 0, 0, 0, 0x88923423);
+                printf("start play\n");
+
+                while (true) {
+                    frameSize = getFrameFromH264(fp, frame, 500000);
+                    if (frameSize < 0) {
+                        printf("finished reading file: %s\n", H264_FILE_NAME);
+                        break;
+                    }
+
+                    if (startCode3(frame)) {
+                        startCode = 3;
+                    } else {
+                        startCode = 4;
+                    }
+
+                    frameSize -= startCode;
+                    rtpSendH264Frame(clientSockfd, rtpPacket, frame + startCode, frameSize);
+
+                    rtpPacket->rtpHeader.timestamp += 90000 / 25;
+
+                    usleep(40000);                    
+                }
+
+                free(frame);
+                free(rtpPacket);
+            });
+
+            std::thread t2([&]() {
+                AdtsHeader adtsHeader;
+                RtpPacket* rtpPacket;
+                uint8_t* frame;
+                int ret;
+
+                FILE* fp = fopen(AAC_FILE_NAME, "rb");
+                if (fp == nullptr) {
+                    printf("failed to read file: %s\n", AAC_FILE_NAME);
+                    return ;
+                }
+
+                frame = (uint8_t*)malloc(5000);
+                rtpPacket = (RtpPacket*)malloc(5000);
+
+                rtpHeaderInit(rtpPacket, 0, 0, 0, RTP_VERSION, RTP_PAYLOAD_TYPE_AAC, 1, 0, 0, 0x32411);
+                
+                while (true) {
+                    ret = fread(frame, 1, 7, fp);
+                    if (ret < 0) {
+                        printf("fread error\n");
+                        break;
+                    }
+                    printf("fread ret = %d\n", ret);
+
+                    if (parseAdtsHeader(frame, &adtsHeader) < 0) {
+                        printf("failed to parse AdtsHeader\n");
+                        break;
+                    }
+
+                    ret = fread(frame, 1, adtsHeader.aacFrameLength - 7, fp);
+                    if (ret <= 0) {
+                        printf("fread error\n");
+                        break;
+                    }
+
+                    rtpSendAACFrame(clientSockfd, rtpPacket, frame, adtsHeader.aacFrameLength - 7);
+
+                    usleep(23223);
+                }
+
+                free(frame);
+                free(rtpPacket);
+            });
+
+            t1.join();
+            t2.join();
+
+            break;
         }
+
+        memset(method, 0, sizeof(method) / sizeof(char));
+        memset(url, 0, sizeof(url) / sizeof(char));
+        CSeq = 0;
     }
+
+    close(clientSockfd);
+    free(rBuf);
+    free(sBuf);
+}
+
+int main() {
+    int serverSockfd = createTcpSocket();
+    if (serverSockfd < 0) {
+        printf("failed to create TCP socket\n");
+        return -1;
+    }
+
+    if (bindSocketAddr(serverSockfd, "0.0.0.0", SERVER_PORT) < 0) {
+        printf("failed to bind addr\n");
+        return -1;
+    }
+
+    if (listen(serverSockfd, 10) < 0) {
+        printf("failed to listen\n");
+        return -1;
+    }
+
+    printf("%s rtsp://127.0.0.1:%d\n", __FILE__, SERVER_PORT);
+
+    while (true) {
+        int clientSockfd = -1;
+        char clientIp[40];
+        uint16_t clientPort;
+
+        clientSockfd = acceptClient(serverSockfd, clientIp, &clientPort);
+        if (clientSockfd < 0) {
+            printf("failed to accept client\n");
+            return -1;
+        }
+        printf("accept client;client ip: %s, client port: %d\n", clientIp, clientPort);
+
+        doClient(clientSockfd, clientIp, clientPort);
+    }
+
+    close(serverSockfd);
+    return 0;
 }
