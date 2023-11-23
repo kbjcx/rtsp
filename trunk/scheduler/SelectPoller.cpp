@@ -1,5 +1,6 @@
 #include "SelectPoller.h"
 
+#include <bits/types/struct_timeval.h>
 #include <sys/select.h>
 
 #include <utility>
@@ -61,4 +62,82 @@ bool SelectPoller::updateIOEvent(IOEvent* event) {
             FD_SET(fd, &mErrorSet);
         }
     }
+
+    if (mEventMap.empty()) {
+        mMaxNumSockets = 0;
+    } else {
+        mMaxNumSockets = mEventMap.rbegin()->first + 1;
+    }
+
+    return true;
+}
+
+bool SelectPoller::removeIOEvent(IOEvent* event) {
+    int fd = event->getFd();
+    if (fd < 0) {
+        return false;
+    }
+
+    FD_CLR(fd, &mReadSet);
+    FD_CLR(fd, &mWriteSet);
+    FD_CLR(fd, &mErrorSet);
+
+    auto it = mEventMap.find(fd);
+
+    if (it != mEventMap.end()) {
+        mEventMap.erase(it);
+    }
+
+    if (mEventMap.empty()) {
+        mMaxNumSockets = 0;
+    } else {
+        mMaxNumSockets = mEventMap.rbegin()->first + 1;
+    }
+
+    return true;
+}
+
+void SelectPoller::handleEvent() {
+    fd_set readSet = mReadSet;
+    fd_set writeSet = mWriteSet;
+    fd_set errorSet = mErrorSet;
+    timeval timeout;
+    int ret, rEvent;
+
+    timeout.tv_sec = 1000;
+    timeout.tv_usec = 0;
+
+    ret = select(mMaxNumSockets, &mReadSet, &mWriteSet, &mErrorSet, &timeout);
+
+    if (ret < 0) {
+        return;
+    } else {
+        LOGINFO("find active fd, ret = %d\n", ret);
+    }
+
+    for (auto it = mEventMap.begin(); it != mEventMap.end(); ++it) {
+        rEvent = 0;
+        if (FD_ISSET(it->first, &readSet)) {
+            rEvent |= IOEvent::EVENT_READ;
+        }
+
+        if (FD_ISSET(it->first, &writeSet)) {
+            rEvent |= IOEvent::EVENT_WRITE;
+        }
+
+        if (FD_ISSET(it->first, &errorSet)) {
+            rEvent |= IOEvent::EVENT_ERROR;
+        }
+
+        if (rEvent != 0) {
+            it->second->setReEvent(rEvent);
+            mIOEvents.push_back(it->second);
+        }
+    }
+
+    for (auto& ioEvent : mIOEvents) {
+        ioEvent->handleEvent();
+    }
+
+    mIOEvents.clear();
 }

@@ -47,6 +47,12 @@ TimerEvent::~TimerEvent() {
     LOGINFO("~TimeEvent()");
 }
 
+/**
+ * @brief 执行超时事件，并返回超时事件是否停止
+ * 
+ * @return true 
+ * @return false 
+ */
 bool TimerEvent::handleEvent() {
     if (mIsStop) {
         return mIsStop;

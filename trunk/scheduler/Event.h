@@ -50,6 +50,10 @@ private:
     bool mIsStop;
 };
 
+/**
+ * @brief 每个文件描述符对应一个IOEvent对象
+ * 
+ */
 class IOEvent {
 public:
     enum IOEventType {
