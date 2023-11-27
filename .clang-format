@@ -53,10 +53,6 @@
       Priority:        1
       SortPriority:    2
       CaseSensitive:   true
-    - Regex:           '^<.*\..*>'
-      Priority:        2
-    - Regex:           '<[[:alnum:].]+>'
-      Priority:        3
     - Regex:           '^".*\..*"'
       Priority:        4
       SortPriority:    0
