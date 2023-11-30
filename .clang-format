@@ -1,0 +1,67 @@
+  Language: Cpp
+  AccessModifierOffset: -4
+  IndentWidth: 4
+  AlignAfterOpenBracket: DontAlign
+  AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
+  AlignConsecutiveMacros: 
+    Enabled: true
+    AcrossEmptyLines: true
+    AcrossComments: false
+  AlignConsecutiveShortCaseStatements: 
+    Enabled: true
+    AcrossEmptyLines: true
+    AcrossComments: true
+    AlignCaseColons: false
+  AlignEscapedNewlines: Left
+  AlignOperands: AlignAfterOperator
+  AllowShortBlocksOnASingleLine: Empty
+  AllowShortCaseLabelsOnASingleLine: false
+  AllowShortEnumsOnASingleLine: false
+  AllowShortFunctionsOnASingleLine: Empty
+  AllowShortIfStatementsOnASingleLine: Never
+  AllowShortLambdasOnASingleLine: Empty
+  AllowShortLoopsOnASingleLine: false
+  AlwaysBreakAfterReturnType: None
+  AlwaysBreakBeforeMultilineStrings: false
+  AlwaysBreakTemplateDeclarations: Yes
+  BinPackArguments: true
+  BinPackParameters: true
+  BitFieldColonSpacing: Both
+  BreakBeforeBraces: Custom
+  BraceWrapping:
+    AfterEnum: false
+    AfterStruct: false
+    SplitEmptyFunction: false
+    AfterCaseLabel: false
+    AfterClass: false
+    AfterControlStatement: Never
+    AfterFunction: false
+    AfterNamespace: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeCatch: false
+    BeforeElse: false
+    BeforeLambdaBody: false
+    BeforeWhile: false
+  BreakConstructorInitializers: BeforeComma
+  BreakStringLiterals: true
+  ColumnLimit: 90
+  EmptyLineBeforeAccessModifier: Always
+  IncludeBlocks: Regroup
+  IncludeCategories:
+    - Regex:           '^<[^\.]+>'
+      Priority:        1
+      SortPriority:    2
+      CaseSensitive:   true
+    - Regex:           '^".*\..*"'
+      Priority:        4
+      SortPriority:    0
+  InsertNewlineAtEOF: true
+  LambdaBodyIndentation: Signature
+  LineEnding: LF
+  MaxEmptyLinesToKeep: 1
+  NamespaceIndentation: None
+  PackConstructorInitializers: BinPack
+  PointerAlignment: Left
+  ReferenceAlignment: Left
+  UseTab: Never
