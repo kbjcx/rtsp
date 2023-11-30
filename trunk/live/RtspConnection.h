@@ -37,7 +37,7 @@ private:
     bool parseCSeq(std::string& message);
     bool parseDescribe(std::string& message);
     bool parseSetup(std::string& message);
-    bool parsePlay(const std::string& message);
+    bool parsePlay(std::string& message);
 
     bool handleCmdOptions();
     bool handleCmdDescribe();

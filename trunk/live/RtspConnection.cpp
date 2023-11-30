@@ -10,6 +10,7 @@
 #include <string>
 
 #include "../base/log.h"
+#include "../base/version.h"
 #include "MediaSession.h"
 #include "MediaSessionManager.h"
 #include "RtspConnection.h"
@@ -295,4 +296,47 @@ bool RtspConnection::parseSetup(std::string& message) {
     }
 
     return false;
+}
+
+bool RtspConnection::parsePlay(std::string& message) {
+    size_t pos = message.find("Session");
+    if (pos != std::string::npos) {
+        uint32_t sessionId = 0;
+        if (sscanf(message.data() + pos, "%*[^:]: %u", &sessionId) != 1) {
+            return false;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool RtspConnection::handleCmdOptions() {
+    snprintf(mBuffer, sizeof(mBuffer),
+        "RTSP/1.0 200 OK\r\n"
+        "CSeq: %u\r\n"
+        "Public: DESCRIBE, ANNOUNCE, SETUP, PLAY, RECORD, PAUSE, GET_PARAMETER, "
+        "TEARDOWN\r\n"
+        "Server: %s\r\n"
+        "\r\n",
+        mCSeq, PROJECT_VERSION);
+
+    if (sendMessage(mBuffer, strlen(mBuffer)) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool RtspConnection::handleCmdDescribe() {
+    MediaSession* session = mRtspServer->mSessionManager->getSession(mSuffix);
+
+    if (!session) {
+        LOGERROR("can not find session: %s", mSuffix.data());
+        return false;
+    }
+
+    std::string sdp = session->generateSPDDescription();
+
+    memset((void*)mBuffer, 0, sizeof(mBuffer));
 }
