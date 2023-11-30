@@ -40,7 +40,7 @@ private:
     IOEvent* mAcceptIOEvent;
     std::mutex mMutex;
 
-    std::map<int, RtspConnectio*> mConnectMap; // 维护所有被创建的连接
+    std::map<int, RtspConnection*> mConnectMap; // 维护所有被创建的连接
     std::vector<int> mDisconnectList; // 所有被取消的连接
     TriggerEvent* mCloseTriggerEvent; // 关闭连接的触发事件
 };
