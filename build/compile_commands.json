@@ -1,0 +1,122 @@
+[
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/AACMediaSource.cpp.o -c /home/llz/CPP/rtsp/trunk/live/AACMediaSource.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/AACMediaSource.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/AACSink.cpp.o -c /home/llz/CPP/rtsp/trunk/live/AACSink.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/AACSink.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/Buffer.cpp.o -c /home/llz/CPP/rtsp/trunk/live/Buffer.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/Buffer.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/H264MediaSource.cpp.o -c /home/llz/CPP/rtsp/trunk/live/H264MediaSource.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/H264MediaSource.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/H264Sink.cpp.o -c /home/llz/CPP/rtsp/trunk/live/H264Sink.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/H264Sink.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/InetAddress.cpp.o -c /home/llz/CPP/rtsp/trunk/live/InetAddress.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/InetAddress.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/MediaSource.cpp.o -c /home/llz/CPP/rtsp/trunk/live/MediaSource.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/MediaSource.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/MediaSession.cpp.o -c /home/llz/CPP/rtsp/trunk/live/MediaSession.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/MediaSession.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/MediaSessionManager.cpp.o -c /home/llz/CPP/rtsp/trunk/live/MediaSessionManager.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/MediaSessionManager.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/Rtp.cpp.o -c /home/llz/CPP/rtsp/trunk/live/Rtp.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/Rtp.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/RtpInstance.cpp.o -c /home/llz/CPP/rtsp/trunk/live/RtpInstance.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/RtpInstance.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/RtspConnection.cpp.o -c /home/llz/CPP/rtsp/trunk/live/RtspConnection.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/RtspConnection.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/RtspServer.cpp.o -c /home/llz/CPP/rtsp/trunk/live/RtspServer.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/RtspServer.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/Sink.cpp.o -c /home/llz/CPP/rtsp/trunk/live/Sink.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/Sink.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/live/TcpConnection.cpp.o -c /home/llz/CPP/rtsp/trunk/live/TcpConnection.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/live/TcpConnection.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/Event.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/Event.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/Event.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/EventScheduler.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/EventScheduler.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/EventScheduler.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/SelectPoller.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/SelectPoller.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/SelectPoller.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/SocketsOptions.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/SocketsOptions.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/SocketsOptions.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/Thread.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/Thread.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/Thread.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/ThreadPool.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/ThreadPool.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/ThreadPool.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/Timer.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/Timer.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/Timer.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/scheduler/UsageEnvironment.cpp.o -c /home/llz/CPP/rtsp/trunk/scheduler/UsageEnvironment.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/scheduler/UsageEnvironment.cpp"
+},
+{
+  "directory": "/home/llz/CPP/rtsp/build",
+  "command": "/usr/bin/c++    ;-std=c++11;-pthread ;-o0;-Wall;-g2;-ggdb   -o CMakeFiles/rtspservrer.dir/trunk/main.cpp.o -c /home/llz/CPP/rtsp/trunk/main.cpp",
+  "file": "/home/llz/CPP/rtsp/trunk/main.cpp"
+}
+]

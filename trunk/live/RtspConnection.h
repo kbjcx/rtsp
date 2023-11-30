@@ -1,12 +1,12 @@
 #ifndef RTSPSERVER_RTSPCONNECTION_H
 #define RTSPSERVER_RTSPCONNECTION_H
 
-#include <RtpInstance.h>
 #include <cstdint>
 #include <map>
 #include <string>
 
 #include "MediaSession.h"
+#include "RtpInstance.h"
 #include "TcpConnection.h"
 
 class RtspServer;

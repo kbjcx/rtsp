@@ -1,0 +1,3 @@
+/home/llz/CPP/rtsp/build/CMakeFiles/rebuild_cache.dir
+/home/llz/CPP/rtsp/build/CMakeFiles/edit_cache.dir
+/home/llz/CPP/rtsp/build/CMakeFiles/rtspservrer.dir
