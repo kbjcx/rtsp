@@ -339,4 +339,249 @@ bool RtspConnection::handleCmdDescribe() {
     std::string sdp = session->generateSPDDescription();
 
     memset((void*)mBuffer, 0, sizeof(mBuffer));
+    snprintf((char*)mBuffer, sizeof(mBuffer),
+        "RTSP/1.0 200 OK\r\n"
+        "CSeq: %u\r\n"
+        "Content-Length: %u\r\n"
+        "Content-Type: application/sdp\r\n"
+        "\r\n"
+        "%s",
+        mCSeq, (unsigned)sdp.size(), sdp.data());
+
+    if (sendMessage(mBuffer, strlen(mBuffer)) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool RtspConnection::handleCmdSetup() {
+    char sessionName[100];
+    if (sscanf(mSuffix.data(), "%[^/]/", sessionName) != 1) {
+        return false;
+    }
+
+    MediaSession* session = mRtspServer->mSessionManager->getSession(sessionName);
+    if (!session) {
+        LOGERROR("can not find session: %s", sessionName);
+        return false;
+    }
+
+    if (mTrackId >= MEDIA_MAX_TRACK_NUM || mRtpInstances[mTrackId] ||
+        mRtcpInstances[mTrackId]) {
+        return false;
+    }
+
+    if (session->isStartMulticast()) {
+        snprintf((char*)mBuffer, sizeof(mBuffer),
+            "RTSP/1.0 200 OK\r\n"
+            "CSeq: %d\r\n"
+            "Transport: RTP/AVP;multicast;"
+            "destination=%s;source=%s;port=%d-%d;ttl=255\r\n"
+            "Session: %08x\r\n"
+            "\r\n",
+            mCSeq, session->getMulticastDestAddr().data(), sockets::getLocalIp().data(),
+            session->getMulticastDestRtpPort(mTrackId),
+            session->getMulticastDestRtpPort(mTrackId) + 1, mSessionId);
+    } else {
+        if (mIsRtpOverTcp) {
+            createRtpOverTcp(mTrackId, mClientFd, mRtpChannel);
+            mRtpInstances[mTrackId]->setSessionId(mSessionId);
+
+            session->addRtpInstance(mTrackId, mRtpInstances[mTrackId]);
+
+            snprintf((char*)mBuffer, sizeof(mBuffer),
+                "RTSP/1.0 200 OK\r\n"
+                "CSeq: %d\r\n"
+                "Server: %s\r\n"
+                "Transport: RTP/AVP/TCP;unicast;interleaved=%hhu-%hhu\r\n"
+                "Session: %08x\r\n"
+                "\r\n",
+                mCSeq, PROJECT_VERSION, mRtpChannel, mRtpChannel + 1, mSessionId);
+        } else {
+            if (!createRtpRtcpOverUdp(mTrackId, mPeerIp, mPeerRtpPort, mPeerRtcpPort)) {
+                LOGERROR("failed to create rtp/rtcp over udp");
+                return false;
+            }
+
+            mRtpInstances[mTrackId]->setSessionId(mSessionId);
+            mRtcpInstances[mTrackId]->setSessionId(mSessionId);
+
+            session->addRtpInstance(mTrackId, mRtpInstances[mTrackId]);
+
+            snprintf((char*)mBuffer, sizeof(mBuffer),
+                "RTSP/1.0 200 OK\r\n"
+                "CSeq: %u\r\n"
+                "Server: %s\r\n"
+                "Transport: RTP/AVP;unicast;client_port=%hu-%hu;server_port=%hu-%hu\r\n"
+                "Session: %08x\r\n"
+                "\r\n",
+                mCSeq, PROJECT_VERSION, mPeerRtpPort, mPeerRtcpPort,
+                mRtpInstances[mTrackId]->getLocalPort(),
+                mRtcpInstances[mTrackId]->getLocalPort(), mSessionId);
+        }
+    }
+
+    if (sendMessage(mBuffer, strlen(mBuffer)) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool RtspConnection::handleCmdPlay() {
+    snprintf((char*)mBuffer, sizeof(mBuffer),
+        "RTSP/1.0 200 OK\r\n"
+        "CSeq: %d\r\n"
+        "Server: %s\r\n"
+        "Range: npt=0.000-\r\n"
+        "Session: %08x; timeout=60\r\n"
+        "\r\n",
+        mCSeq, PROJECT_VERSION, mSessionId);
+
+    if (sendMessage(mBuffer, strlen(mBuffer)) < 0) {
+        return false;
+    }
+
+    for (int i = 0; i < MEDIA_MAX_TRACK_NUM; ++i) {
+        if (mRtpInstances[i]) {
+            mRtpInstances[i]->setAlive(true);
+        }
+
+        if (mRtcpInstances[i]) {
+            mRtcpInstances[i]->setAlive(true);
+        }
+    }
+
+    return true;
+}
+
+bool RtspConnection::handleCmdTeardown() {
+    snprintf((char*)mBuffer, sizeof(mBuffer),
+        "RTSP/1.0 200 OK\r\n"
+        "CSeq: %d\r\n"
+        "Server: %s\r\n"
+        "\r\n",
+        mCSeq, PROJECT_VERSION);
+
+    if (sendMessage(mBuffer, strlen(mBuffer)) < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+int RtspConnection::sendMessage(void* buf, int size) {
+    LOGINFO("%s", buf);
+    int ret;
+    mOutputBuffer.append(buf, size);
+    ret = mOutputBuffer.write(mClientFd);
+    mOutputBuffer.retrieveAll();
+
+    return ret;
+}
+
+int RtspConnection::sendMessage() {
+    int ret = mOutputBuffer.write(mClientFd);
+    mOutputBuffer.retrieveAll();
+    return ret;
+}
+
+bool RtspConnection::createRtpRtcpOverUdp(MediaSession::TrackId trackId,
+    std::string peerIp, uint16_t peerRtpPort, uint16_t peerRtcpPort) {
+    int rtpSocket, rtcpSocket;
+    uint16_t rtpPort, rtcpPort;
+    bool ret;
+
+    if (mRtpInstances[trackId] || mRtcpInstances[trackId]) {
+        return false;
+    }
+
+    int i;
+    for (i = 0; i < 10; ++i) {
+        rtpSocket = sockets::createUdpSocket();
+        if (rtpSocket < 0) {
+            return false;
+        }
+
+        rtcpSocket = sockets::createUdpSocket();
+        if (rtcpSocket < 0) {
+            sockets::close(rtpSocket);
+            return false;
+        }
+
+        uint16_t port = rand() & 0xFFFE;
+        if (port < 10000) {
+            port += 10000;
+        }
+
+        rtpPort = port;
+        rtcpPort = port + 1;
+
+        ret = sockets::bind(rtpSocket, "0.0.0.0", rtpPort);
+        if (!ret) {
+            sockets::close(rtpSocket);
+            sockets::close(rtcpSocket);
+            continue;
+        }
+
+        break;
+    }
+
+    if (i == 10) {
+        return false;
+    }
+
+    mRtpInstances[trackId] =
+        RtpInstance::createNewOverUdp(rtpSocket, rtpPort, peerIp, peerRtpPort);
+    mRtcpInstances[trackId] =
+        RtcpInstance::createNew(rtcpSocket, rtcpPort, peerIp, peerRtpPort);
+
+    return true;
+}
+
+bool RtspConnection::createRtpOverTcp(
+    MediaSession::TrackId trackId, int sockfd, uint8_t rtpChannel) {
+    mRtpInstances[trackId] = RtpInstance::createNewOverTcp(sockfd, rtpChannel);
+
+    return true;
+}
+
+void RtspConnection::handleRtpOverTcp() {
+    int num = 0;
+    while (true) {
+        num += 1;
+        uint8_t* buf = (uint8_t*)mInputBuffer.peek();
+        uint8_t rtpChannel = buf[1];
+        int16_t rtpSize = (buf[2] << 8) | buf[3];
+        int16_t bufSize = rtpSize + 4;
+
+        if (mInputBuffer.readableBytes() < bufSize) {
+            // cached data is less than the length of RTP header
+            return;
+        } else {
+            if (rtpChannel == 0x00) {
+                RtpHeader rtpHeader;
+                parseRtpHeader(buf + 4, &rtpHeader);
+                LOGINFO("num=%d, rtpSize=%d", num, rtpSize);
+            } else if (rtpChannel == 0x01) {
+                RtcpHeader rtcpHeader;
+                parseRtcpHeader(buf + 4, &rtcpHeader);
+
+                LOGINFO("num=%d, rtcpHeader.packetType=%d, rtpSize=%d", num,
+                    rtcpHeader.packetType, rtpSize);
+            } else if (rtpChannel == 0x02) {
+                RtpHeader rtpHeader;
+                parseRtpHeader(buf + 4, &rtpHeader);
+                LOGINFO("num=%d, rtpSize=%d", num, rtpSize);
+            } else if (rtpChannel == 0x03) {
+                RtcpHeader rtcpHeader;
+                parseRtcpHeader(buf + 4, &rtcpHeader);
+                LOGINFO("num=%d, rtcpHeader.packetType=%d, rtpSize=%d", num,
+                    rtcpHeader.packetType, rtpSize);
+            }
+
+            mInputBuffer.retrieve(bufSize);
+        }
+    }
 }

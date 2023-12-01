@@ -53,7 +53,7 @@ private:
 
     bool createRtpOverTcp(MediaSession::TrackId trackId, int sockfd, uint8_t rtpChannel);
 
-    bool handleRtpOverTcp();
+    void handleRtpOverTcp();
 
 private:
     RtspServer* mRtspServer;

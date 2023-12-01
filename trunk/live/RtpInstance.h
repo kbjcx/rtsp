@@ -86,16 +86,35 @@ public:
 
     ~RtcpInstance();
 
-    int send(void* buf, int size);
+    int send(void* buf, int size) {
+        return sockets::sendto(mLocalSockfd, buf, size, mDestAddr.getAddr());
+    }
 
-    int recv(void* buf, int size, Ipv4Address* addr);
+    int recv(void* buf, int size, Ipv4Address* addr) {
+        // TODO
+        return 0;
+    }
 
-    uint16_t getLocalPort() const;
+    uint16_t getLocalPort() const {
+        return mLocalPort;
+    }
 
-    int alive() const;
-    int setAlive(bool alive);
-    void setSessionId(uint16_t sessionId);
-    uint16_t sessionId() const;
+    int alive() const {
+        return mIsAlive;
+    }
+
+    int setAlive(bool alive) {
+        mIsAlive = alive;
+        return 1;
+    }
+
+    void setSessionId(uint16_t sessionId) {
+        mSessionId = sessionId;
+    }
+
+    uint16_t sessionId() const {
+        return mSessionId;
+    }
 
 private:
     int mLocalSockfd;

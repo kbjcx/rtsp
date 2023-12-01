@@ -1,12 +1,10 @@
-#include "SelectPoller.h"
-
 #include <bits/types/struct_timeval.h>
 #include <sys/select.h>
-
 #include <utility>
 
 #include "../base/log.h"
 #include "Event.h"
+#include "SelectPoller.h"
 
 SelectPoller::SelectPoller() {
     FD_ZERO(&mReadSet);
